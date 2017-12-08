@@ -1137,15 +1137,19 @@ class TaskGroupBuilderTest extends UnitTest with Inside {
         lifecycle = Some(Lifecycle(Some(killDuration.toSeconds))))
 
       val podSpec = PodDefinition(id = PathId("/tty"), containers = Seq(container))
+      val instanceId = Instance.Id.forRunSpec(podSpec.id)
+      val taskIds = podSpec.containers.map(c => Task.Id.forInstanceId(instanceId, Some(c)))
       val resourceMatch = RunSpecOfferMatcher.matchOffer(podSpec, offer, Nil,
         defaultBuilderConfig.acceptedResourceRoles, config, Nil)
-      val (_, taskGroupInfo, _, _) = TaskGroupBuilder.build(
+      val (_, taskGroupInfo, _) = TaskGroupBuilder.build(
         podSpec,
         offer,
-        s => Instance.Id.forRunSpec(s),
+        instanceId,
+        taskIds,
         defaultBuilderConfig,
         RunSpecTaskProcessor.empty,
-        resourceMatch.asInstanceOf[ResourceMatchResponse.Match].resourceMatch
+        resourceMatch.asInstanceOf[ResourceMatchResponse.Match].resourceMatch,
+        None
       )
 
       taskGroupInfo.getTasks(0).getKillPolicy.getGracePeriod.getNanoseconds shouldBe (killDuration.toNanos)
