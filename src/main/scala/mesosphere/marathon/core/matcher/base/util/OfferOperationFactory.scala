@@ -47,8 +47,7 @@ class OfferOperationFactory(
       .build()
   }
 
-  def reserve(reservationLabels: ReservationLabels, resources: Seq[Mesos.Resource]): //
-  Mesos.Offer.Operation = {
+  def reserve(reservationLabels: ReservationLabels, resources: Seq[Mesos.Resource]): Mesos.Offer.Operation = {
     val reservedResources = resources.map { resource =>
 
       val reservation = ReservationInfo.newBuilder()
@@ -81,9 +80,11 @@ class OfferOperationFactory(
           val persistence = Mesos.Resource.DiskInfo.Persistence.newBuilder().setId(vol.id.idString)
           principalOpt.foreach(persistence.setPrincipal)
 
+          val name = vol.persistentVolume.name.getOrElse(vol.mount.mountPath)
+          val mode = if (vol.mount.readOnly) Mesos.Volume.Mode.RO else Mesos.Volume.Mode.RW
           val volume = Mesos.Volume.newBuilder()
-            .setContainerPath(vol.persistentVolume.containerPath)
-            .setMode(vol.persistentVolume.mode)
+            .setContainerPath(name)
+            .setMode(mode)
 
           val builder = Mesos.Resource.DiskInfo.newBuilder()
             .setPersistence(persistence)
