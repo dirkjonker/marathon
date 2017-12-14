@@ -250,11 +250,11 @@ class InstanceOpFactoryImpl(
           newTaskIds = Map(taskId -> newTaskId),
           runSpecVersion = spec.version,
           timestamp = now,
-          statuses = Map(taskId -> Task.Status(
+          statuses = Map(newTaskId -> Task.Status(
             stagedAt = now,
             condition = Condition.Created,
             networkInfo = networkInfo)),
-          Map(taskId -> networkInfo.hostPorts),
+          Map(newTaskId -> networkInfo.hostPorts),
           agentInfo)
 
         taskOperationFactory.launchOnReservation(taskInfo, stateOp, reservedInstance)
@@ -271,7 +271,7 @@ class InstanceOpFactoryImpl(
           taskId -> Task.Id.forResidentTask(taskId)
         }(collection.breakOut)
 
-        val containerNameToTaskId: Map[String, Task.Id] = newTaskIds.keys.map { taskId =>
+        val containerNameToTaskId: Map[String, Task.Id] = newTaskIds.values.map { taskId =>
           taskId.containerName.getOrElse(throw new IllegalStateException("reached")) -> taskId
         }(collection.breakOut)
         val podContainerTaskIds: Seq[Task.Id] = pod.containers.map { container =>
@@ -284,12 +284,12 @@ class InstanceOpFactoryImpl(
         val networkInfos = podTaskNetworkInfos(pod, agentInfo, podContainerTaskIds, hostPorts)
         val now = clock.now()
         val statuses = networkInfos.map {
-          case (taskId, networkInfo) =>
-            taskId -> Task.Status(stagedAt = now, condition = Condition.Created, networkInfo = networkInfo)
+          case (newTaskId, networkInfo) =>
+            newTaskId -> Task.Status(stagedAt = now, condition = Condition.Created, networkInfo = networkInfo)
         }
         val taskHostPorts = networkInfos.map {
-          case (taskId, networkInfo) =>
-            taskId -> networkInfo.hostPorts
+          case (newTaskId, networkInfo) =>
+            newTaskId -> networkInfo.hostPorts
         }
 
         val stateOp = InstanceUpdateOperation.LaunchOnReservation(

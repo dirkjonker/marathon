@@ -88,7 +88,7 @@ object InstanceUpdater extends StrictLogging {
       val taskEffects = currentTasks.map {
         case (taskId, task) =>
           val newTaskId = op.newTaskIds.getOrElse(taskId, throw new IllegalStateException("reached"))
-          val status = op.statuses.getOrElse(taskId, throw new IllegalStateException("reached"))
+          val status = op.statuses.getOrElse(newTaskId, throw new IllegalStateException("reached"))
           task.update(TaskUpdateOperation.LaunchOnReservation(newTaskId, op.runSpecVersion, status))
       }
 
