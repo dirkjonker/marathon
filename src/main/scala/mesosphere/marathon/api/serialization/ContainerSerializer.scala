@@ -80,15 +80,14 @@ object ContainerSerializer {
         builder.setMesos(MesosAppCSerializer.toMesos(ma))
     }
 
-    container.volumes.foreach { volumeWithMount =>
-      val volume = volumeWithMount.volume
-      val mount = volumeWithMount.mount
-      volume match {
-        case _: PersistentVolume => // PersistentVolumes are handled differently
-        case ev: ExternalVolume => ExternalVolumes.build(builder, ev, mount) // this also adds the volume
-        case dv: HostVolume => builder.addVolumes(VolumeSerializer.toMesos(dv, mount))
-        case _: SecretVolume => // SecretVolumes are handled differently
-      }
+    container.volumes.foreach {
+      case VolumeWithMount(volume, mount) =>
+        volume match {
+          case _: PersistentVolume => // PersistentVolumes are handled differently
+          case ev: ExternalVolume => ExternalVolumes.build(builder, ev, mount) // this also adds the volume
+          case dv: HostVolume => builder.addVolumes(VolumeSerializer.toMesos(dv, mount))
+          case _: SecretVolume => // SecretVolumes are handled differently
+        }
     }
 
     // only UCR containers have NetworkInfo's generated this way
