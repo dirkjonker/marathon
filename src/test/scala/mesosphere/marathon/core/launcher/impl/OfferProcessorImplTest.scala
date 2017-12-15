@@ -147,7 +147,7 @@ class OfferProcessorImplTest extends UnitTest {
           val newTaskId = Task.Id.forResidentTask(taskId)
           val updateOperation = InstanceUpdateOperation.LaunchOnReservation(
             instanceId = dummyInstance.instanceId,
-            newTaskIds = Map(taskId -> newTaskId),
+            oldToNewTaskIds = Map(taskId -> newTaskId),
             runSpecVersion = clock.now(),
             timestamp = clock.now(),
             statuses = Map(taskId -> Task.Status(

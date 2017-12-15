@@ -39,7 +39,10 @@ object InstanceUpdateOperation {
 
   /**
     * @param instanceId Designating the instance that shall be launched.
-    * @param newTaskIds The IDs of the tasks that will be launched via Mesos
+    * @param oldToNewTaskIds Mapping from old task IDs to new ones. It is required in order to maintain stable task IDs
+    *                        for resident tasks (currently, the ones, which have persistent volumes), which are launched
+    *                        upon a resource reservation. Stable here means that only the UUID and attempt part change,
+    *                        and the rest stays the same.
     * @param runSpecVersion The runSpec version
     * @param timestamp time
     * @param statuses the tasks' statuses
@@ -52,7 +55,7 @@ object InstanceUpdateOperation {
     */
   case class LaunchOnReservation(
       instanceId: Instance.Id,
-      newTaskIds: Map[Task.Id, Task.Id], // mapping of old task IDs to new ones
+      oldToNewTaskIds: Map[Task.Id, Task.Id],
       runSpecVersion: Timestamp,
       timestamp: Timestamp,
       statuses: Map[Task.Id, Task.Status],

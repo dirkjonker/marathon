@@ -247,7 +247,7 @@ class InstanceOpFactoryImpl(
         val now = clock.now()
         val stateOp = InstanceUpdateOperation.LaunchOnReservation(
           instanceId = reservedInstance.instanceId,
-          newTaskIds = Map(taskId -> newTaskId),
+          oldToNewTaskIds = Map(taskId -> newTaskId),
           runSpecVersion = spec.version,
           timestamp = now,
           statuses = Map(newTaskId -> Task.Status(
@@ -267,11 +267,11 @@ class InstanceOpFactoryImpl(
 
         val instanceId = reservedInstance.instanceId
         val taskIds = reservedInstance.tasksMap.keys
-        val newTaskIds: Map[Task.Id, Task.Id] = taskIds.map { taskId =>
+        val oldToNewTaskIds: Map[Task.Id, Task.Id] = taskIds.map { taskId =>
           taskId -> Task.Id.forResidentTask(taskId)
         }(collection.breakOut)
 
-        val containerNameToTaskId: Map[String, Task.Id] = newTaskIds.values.map { taskId =>
+        val containerNameToTaskId: Map[String, Task.Id] = oldToNewTaskIds.values.map { taskId =>
           taskId.containerName.getOrElse(throw new IllegalStateException("reached")) -> taskId
         }(collection.breakOut)
         val podContainerTaskIds: Seq[Task.Id] = pod.containers.map { container =>
@@ -294,7 +294,7 @@ class InstanceOpFactoryImpl(
 
         val stateOp = InstanceUpdateOperation.LaunchOnReservation(
           instanceId = reservedInstance.instanceId,
-          newTaskIds = newTaskIds,
+          oldToNewTaskIds = oldToNewTaskIds,
           runSpecVersion = pod.version,
           timestamp = now,
           statuses = statuses,

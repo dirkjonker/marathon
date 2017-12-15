@@ -118,7 +118,7 @@ case class TestInstanceBuilder(
     val newTaskId = Task.Id.forResidentTask(taskId)
     InstanceUpdateOperation.LaunchOnReservation(
       instanceId = instance.instanceId,
-      newTaskIds = Map(taskId -> newTaskId),
+      oldToNewTaskIds = Map(taskId -> newTaskId),
       timestamp = now,
       runSpecVersion = instance.runSpecVersion,
       statuses = Map(taskId -> Task.Status(

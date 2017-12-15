@@ -45,7 +45,7 @@ class InstanceUpdateOpResolverTest extends UnitTest with Inside {
       val newTaskId = Task.Id.forResidentTask(taskId)
       val stateChange = updateOpResolver.resolve(InstanceUpdateOperation.LaunchOnReservation(
         instanceId = notExistingInstanceId,
-        newTaskIds = Map(taskId -> newTaskId),
+        oldToNewTaskIds = Map(taskId -> newTaskId),
         runSpecVersion = Timestamp(0),
         timestamp = Timestamp(0),
         statuses = Map(taskId -> Task.Status(
