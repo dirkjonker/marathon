@@ -128,36 +128,26 @@ object VolumeSerializer {
     val mount = volumeWithMount.mount
     val mode = if (mount.readOnly) mesos.Protos.Volume.Mode.RO else mesos.Protos.Volume.Mode.RW
 
+    val volumeBuilder = Protos.Volume.newBuilder()
+      .setContainerPath(mount.mountPath)
+      .setMode(mode)
+
     volume match {
       case p: PersistentVolume =>
-        Protos.Volume.newBuilder()
-          .setContainerPath(mount.mountPath)
-          .setPersistent(PersistentVolumeInfoSerializer.toProto(p.persistent))
-          .setMode(mode)
-          .build()
+        volumeBuilder.setPersistent(PersistentVolumeInfoSerializer.toProto(p.persistent))
 
       case e: ExternalVolume =>
-        Protos.Volume.newBuilder()
-          .setContainerPath(mount.mountPath)
-          .setExternal(ExternalVolumeInfoSerializer.toProto(e.external))
-          .setMode(mode)
-          .build()
+        volumeBuilder.setExternal(ExternalVolumeInfoSerializer.toProto(e.external))
 
       case d: HostVolume =>
-        Protos.Volume.newBuilder()
-          .setContainerPath(mount.mountPath)
-          .setHostPath(d.hostPath)
-          .setMode(mode)
-          .build()
+        volumeBuilder.setHostPath(d.hostPath)
 
       case s: SecretVolume =>
         val secretVolumeInfo = Protos.Volume.SecretVolumeInfo.newBuilder().setSecret(s.secret).build()
-        Protos.Volume.newBuilder()
-          .setContainerPath(mount.mountPath)
-          .setSecret(secretVolumeInfo)
-          .setMode(mode)
-          .build()
+        volumeBuilder.setSecret(secretVolumeInfo)
     }
+
+    volumeBuilder.build()
   }
 
   /**
